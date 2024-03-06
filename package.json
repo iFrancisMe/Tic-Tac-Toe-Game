@@ -1,0 +1,27 @@
+{
+  "name": "tic-tac-toe-game",
+  "version": "1.0.0",
+  "description": "Week 11 Project",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/iFrancisMe/Tic-Tac-Toe-Game.git"
+  },
+  "author": "Francis Mendoza",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/iFrancisMe/Tic-Tac-Toe-Game/issues"
+  },
+  "homepage": "https://github.com/iFrancisMe/Tic-Tac-Toe-Game#readme",
+  "dependencies": {
+    "@fontsource-variable/tilt-neon": "^5.0.3",
+    "bootstrap": "^4.6.2",
+    "jquery": "^3.7.1"
+  },
+  "devDependencies": {
+    "emojilib": "^3.0.11"
+  }
+}
