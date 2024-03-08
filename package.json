@@ -15,7 +15,7 @@
   "bugs": {
     "url": "https://github.com/iFrancisMe/Tic-Tac-Toe-Game/issues"
   },
-  "homepage": "https://github.com/iFrancisMe/Tic-Tac-Toe-Game#readme",
+  "homepage": "https://ifrancisme.github.io/Tic-Tac-Toe-Game",
   "dependencies": {
     "@fontsource-variable/tilt-neon": "^5.0.3",
     "bootstrap": "^4.6.2",

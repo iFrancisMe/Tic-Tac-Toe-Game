@@ -1,6 +1,6 @@
 body {
     background-color: rgb(255, 255, 255);
-    font-family: "Tilt Neon Variable";
+    font-family: "Tilt Neon", sans-serif;
 }
 .gameTitle {
     font-size: 8vh;
@@ -81,7 +81,6 @@ body {
     animation-iteration-count: 2;
     animation-duration: 1000ms;
     animation-delay: 500ms;
-    font-family: "Tilt Neon Variable";
     }
 .grid-box:hover {
     filter: brightness(0.8);
