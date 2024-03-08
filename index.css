@@ -1,0 +1,132 @@
+body {
+    background-color: rgb(255, 255, 255);
+    font-family: "Tilt Neon Variable";
+}
+.gameTitle {
+    font-size: 8vh;
+}
+#alert {
+    position: fixed;
+    z-index: 0;
+    right: 0;
+    top: 0px;
+    left: 0;
+    width: 100%;
+    padding-left: 50px;
+    text-align: center;
+    padding-right: 3rem;
+}
+#alert-title {
+    padding-right: 2rem;
+}
+#statusBoardContent {
+    font-size: large;
+}
+.token-statusboard {
+    width: 20vw;
+    height: 20vw;
+    max-width: 150px;
+    max-height: 150px;
+    min-width: 100px;
+    min-height: 120px;   
+
+    div {
+        position: relative;
+        width: 100%;
+        max-width: 90px;
+        font-size: min(max(64px,6vw), 80px);
+        
+        
+        img {          
+            max-width: 80%;
+            object-fit: contain;
+            margin: auto;
+            position: relative;
+            margin-bottom: 6vmax;
+            margin-top: 3vh;
+        }
+    }
+}
+#gameBoard {
+    img {
+        width: 60%;
+        object-fit: contain;
+        margin: auto;
+    }
+    .token {
+        font-size: min(max(32px,8vh), 18vh);
+        padding-top: 4vh;
+    }
+    .grid-box {
+        min-width: 100px;
+        width: 100%;
+        max-height: 350px;
+        height: 30vh;
+    }
+    .grid-button {
+        width: 100%;
+        min-height: 18vh;
+    }
+}
+.alert-body{
+    font-size: xx-large;
+}
+.shadow {
+    box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.075) inset, 0px 0px 100px rgba(117, 131, 134, 0.5);
+}
+.marquee {
+    margin-top: 1;
+    margin-bottom: 1;
+    animation-name: spin-0;
+    animation-iteration-count: 2;
+    animation-duration: 1000ms;
+    animation-delay: 500ms;
+    font-family: "Tilt Neon Variable";
+    }
+.grid-box:hover {
+    filter: brightness(0.8);
+    }
+.grid-button:active {
+    border: none;
+}
+.grid-button:hover {
+    cursor: pointer;
+}
+.spin-horizontal {
+    animation-name: spin-1;
+    animation-iteration-count: 2;
+    animation-duration: 1000ms;
+    animation-delay: 500ms;
+}
+.spin-vertical {
+    animation-name: spin-2;
+    animation-iteration-count: 2;
+    animation-duration: 1000ms;
+    animation-delay: 10ms;
+    animation-direction: alternate;
+}
+.glow {
+    animation-name: glow;
+    animation-iteration-count: infinite;
+    animation-duration: 1500ms;
+}
+.jumbotron {
+    border-color: #58585b;
+    box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.075) inset, 0px 0px 30px rgba(163, 167, 196, 0.5);
+}   
+@keyframes spin-0 {
+    from { rotate: 0 0 0 1deg; }
+    to { rotate: 0 10 0 180deg; }
+}
+@keyframes spin-1 {
+    from { rotate: 0 0 0 1deg; }
+    to { rotate: 0 1 1 180deg; }
+}
+@keyframes spin-2 {
+    from { rotate: 0 0 0 1deg; }
+    to { rotate: 1 0 0 180deg; }
+}
+@keyframes glow {
+    from { text-shadow: 0 0 15px #8f9ead, 0 0 10px #a6dcef, 0 0 15px rgb(159, 178, 184);}
+    to {text-shadow: 0 0 15px #ebecf1, 0 0 10px #959bac, 0 0 15px rgb(148, 197, 232);}
+}
