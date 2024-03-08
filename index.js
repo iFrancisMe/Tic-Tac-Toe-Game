@@ -64,7 +64,9 @@ class TicTacToe {
     ];
 
     #turnsCounter = 0; // To track player turns
+    #turnsCounterLatestBeforeEnd;
 
+    // For testing on console, computer vs computer
     #computerMovesCounter = 0; // To act as a factor in delaying computer actions for viewer to keep track of progression of game
 
     // Array to hold current running game board selections
@@ -81,13 +83,12 @@ class TicTacToe {
     #isInProgress = false;
 
     // Winner object
-    #winner = [
-        {
+    #winner = {
             Name: '',
             Token: '',
             PatternIndices: [] // Possible win by multiple rows
-        }
-    ];
+        };
+
 
     #MAX_PLAYERS = 2;
     
@@ -99,7 +100,12 @@ class TicTacToe {
         let x = this.#x;
         let y = this.#y;
 
-        this.players;
+        this.players = [
+            {
+                Name: '',
+                Token: ''
+            }
+        ];
     }
 
     pauseGame(booleanVal) {
@@ -122,8 +128,12 @@ class TicTacToe {
         return playerIndex;
     }
 
-    whoseTurnIndex() {
+    whoseTurnIndex(option) {
         let turnIndex = this.#turnsCounter;
+
+        if (option === 'latest' && this.#isInProgress === false) {
+            return this.#turnsCounterLatestBeforeEnd % this.#MAX_PLAYERS;
+        }
 
         if (turnIndex === undefined) {
             return turnIndex; // Undefined indicates game is stopped and nobody's turn
@@ -155,13 +165,13 @@ class TicTacToe {
 
         // Can only start game if no game in progress and not stopped
         if (this.#turnsCounter === 0 && this.#isInProgress === false) {
-            testPoints(`Class Method startRound: Getting whoseFirstIndex: ${this.whosFirst}`);
+            testPoints(`Class Method startRound: Getting whoseFirstIndex: ${this.whosFirst()}`);
             this.#turnsCounter = this.whosFirst(); // Sets turns counter to index of starting player
             this.#isInProgress = true; // set game status to started
 
             let playerIndex = this.whoseTurnIndex();
             testPoints(`Class Method: startRound, player index is ${playerIndex} of type ${typeof(playerIndex)}`);
-            testPoints(`Class Method: startRound, player Name is ${this.players[0].Name}`);
+            testPoints(`Class Method: startRound, player Name is ${this.players[playerIndex].Name}`);
 
             return this.#turnsCounter; // return starting player index
 
@@ -258,6 +268,7 @@ class TicTacToe {
     endGame() {
         // Stop Game without resetting data
         this.#isInProgress = false;
+        this.#turnsCounterLatestBeforeEnd = this.#turnsCounter; // Main counter is set to undefined to indicate that game is over but not reset. Copying counter to still be able to last turn index via option parameter in method.
         this.#turnsCounter = undefined;
     }
 
@@ -274,6 +285,8 @@ class TicTacToe {
 
     getWinner(itemName) {
         
+        testPoints(`Class Method: getWinner, Reading winner object ${this.#winner.PatternIndices}`)
+        testPoints(`Class Method: getWinner, Reading winner object length of array of winning indeces = ${this.#winner.PatternIndices.length}`)
         // If winner exists, returned array should have length > 0
         if (this.#winner.PatternIndices.length > 0) {
             
@@ -498,6 +511,20 @@ var game = new TicTacToe();
  */
 
 // ----------------Event Handlers-----------------------------------------------------
+
+// Close alert div when clicked
+onClick('alert', 'click', () => {
+
+    if (game.isGameOver() === true) {
+        let alertDiv = document.getElementById('alert');
+
+        setTimeout(() => {
+            if (alertDiv.classList.contains('collapse') == false) {
+                alertDiv.classList.add('collapse');
+            }
+        }, 1000);
+    }
+});
 
 onClick('gameStartButton', 'click', () => {
     let numberOfPlayers = document.getElementById('formNumberOfPlayersSelected').value;
@@ -811,7 +838,7 @@ let announce = {
     Info: (announceMessage) => {
         let messageElement = document.getElementById('alert');
         let messageArea = messageElement.getElementsByTagName('p');
-        messageArea.item(0).innerText = announceMessage;
+        messageArea.item(0).innerHTML = announceMessage;
     },
     sendAlert(timeoutValue = 0) {
         let messageID = announementCounter; // ID to track message relevancy
@@ -852,6 +879,8 @@ function sendGameStatus(message) {
 
 function buttonClicked(id) {
 
+    testPoints(`Game Board Button ${id} Clicked`)
+
     // check if button already taken
     let tokenElementID = 'token-' + id[id.length - 1];
     let tokenElement = document.getElementById(tokenElementID);
@@ -863,13 +892,13 @@ function buttonClicked(id) {
 
     // Check if game is paused
     // If game is paused, ignore controls
-    if (game.isPaused() === false) {
+    if (game.isPaused() === false && game.isGameOver() === false) {
         
         playerMove(id); // Initiate player actions
 
     } else {
         
-        testPoints(`Game Board Button Clicked, but game is paused. Ignoring events.`)
+        testPoints(`Game Board Button Clicked, but game is paused or game is over. Ignoring events.`)
     }
 }
 
@@ -891,7 +920,7 @@ function computerMove() {
         game.pauseGame(false); // unpause game board and send values to playermove function
         playerMove(computerPlayerMove, computerPlayerIndex);
 
-    }, 1500 * movesCounter++);
+    }, 3500);
 }
 
 function playerMove(playerSelectionIndex, playerIndex) {
@@ -979,9 +1008,14 @@ function playerMove(playerSelectionIndex, playerIndex) {
         if (game.whoseTurnIndex() === 1) {
             color = 'text-danger';
         }
-        sendGameStatus(`<span class="${color}" >Player ${game.getPlayerName(game.whoseTurnIndex())}'s move</span>`)
-        announce.Title(`${game.getPlayerName(game.whoseTurnIndex())}'s turn`);
-        announce.sendAlert(1500);
+        
+        let announceDelay = 1500; // Delay change turn notifaction. When computer makes move, notifications seems to appear too quickly
+        setTimeout(() => {
+            sendGameStatus(`<span class="${color}" >Player ${game.getPlayerName(game.whoseTurnIndex())}'s move</span>`)
+            announce.Title(`${game.getPlayerName(game.whoseTurnIndex('last'))}'s turn`);
+            announce.sendAlert(1500);
+        }, announceDelay);
+
     }
 
     if (game.whoseTurnIndex() === undefined){
@@ -1007,11 +1041,11 @@ function playerMove(playerSelectionIndex, playerIndex) {
                 winnerToken = getEmojiObject(winnerToken).emoji;
             }
             
-            announce.Info(`${winner.Name} wins with 3 ${winnerToken}'s in a row:\n\n${patterns()}`);
+            announce.Info(`${winner.Name} wins with 3 ${winnerToken}'s in a row:<br/>${patterns()}`);
             announce.sendAlert();
 
             // Send notice to status board
-            sendGameStatus(`<span class="text-danger">Winner: </span> ${winner.Name}`);
+            sendGameStatus(`<span class="text-danger">Winner<br/> </span> ${winner.Name} with Token ${winnerToken}`);
         }
     } else {
 
@@ -1026,7 +1060,7 @@ function playerMove(playerSelectionIndex, playerIndex) {
 function startGame(formDataObject) {
 
     const gridSize = 9;
-    let grid = new Array(gridSize).fill('');
+    let columnCount = 3;
 
     // Build game board content
 
@@ -1036,7 +1070,22 @@ function startGame(formDataObject) {
 
     for (let index = 0; index < gridSize; index++) {
 
-        
+        /**
+         * The class was designed around index values sequenced along the columns rather than the rows, but our grid pattern must be built row-by-row.
+         * We need to remap our button ids to correspond to the correct location on the 3x3 grid pattern. Modifying the class to accomodate an alternate 
+         * sequence risks overcomplicating and breaking it and is unnecessary. Better to accomodate the index translation here.
+        */
+
+        let columnIndex = index % columnCount; 
+        let rowIndex = parseInt((index - columnIndex) / columnCount);
+        let buttIDValueOffset = parseInt(columnIndex * columnCount);
+        let buttonIndexIDValue = rowIndex + buttIDValueOffset;
+        testPoints(`Function: startGame, Translating index value to button ID value. Current Index = ${index}`);
+        testPoints(`Function: startGame, Translating index value to button ID value. ID = ${buttonIndexIDValue}`);
+        testPoints(`Function: startGame, Translating index value to button ID value. Column Index = ${columnIndex}`);
+        testPoints(`Function: startGame, Translating index value to button ID value. Row Index = ${rowIndex}`);
+        testPoints(`Function: startGame, Translating index value to button ID value. ID Offset = ${buttIDValueOffset}`);
+
         let classAppendList = '';
 
         testPoints(`Building Game Board At Index ${index}`);
@@ -1048,7 +1097,7 @@ function startGame(formDataObject) {
         }
 
         // For animation effect, every alternating grid square will share an animation sequence (i.e., even vs odd squares)
-        if (index % 2 === 0) {
+        if (buttonIndexIDValue % 2 === 0) {
             // Even indexes will spin horizontally. Odds will spin vertically
             classAppendList += 'spin-horizontal ';
         } else {
@@ -1058,10 +1107,10 @@ function startGame(formDataObject) {
         content += `
         <div class="col-4">
             <div class="card glow bg-transparent border-0">
-                <div id="button-grid-${index}" class="${classAppendList} jumbotron grid-box bg-primary hover-shadow my-3 m-0 text-center text-white">
-                    <div id="button-${index}" class="jumbotron grid-button card glow bg-primary border-5" onclick="buttonClicked(this.id);">
-                        <h1 id="token-${index}" class="display-1">?</h1>
-                        <img id="token-image-${index}" class="mx-auto" src="" width="122" height="122" hidden/>
+                <div id="button-grid-${buttonIndexIDValue}" class="${classAppendList} jumbotron grid-box bg-primary hover-shadow my-3 m-0 text-center text-white">
+                    <div id="button-${buttonIndexIDValue}" class="jumbotron grid-button card glow bg-primary border-5 p-0 text-center" onclick="buttonClicked(this.id);">
+                        <h1 id="token-${buttonIndexIDValue}" class="token text-center">?</h1>
+                        <img id="token-image-${buttonIndexIDValue}" class="mx-auto" src="" hidden />
                     </div>
                 </div>
             </div>
@@ -1088,28 +1137,49 @@ function startGame(formDataObject) {
                 </div>
                 <div class="col-12">
                     <div class="container card jumbotron border-5 border-primary bg-white my-4">
-                        <div class="row">
-                            <div id="statusBoard" class="col-5 mx-2 text-danger">
-                                <label class=""><h3>Game Board Stats</h3></label>
-                            </div>
-                            <div class="col-5 status">
-                                <label id="statusMessage" class="border-0 text-primary ml-2 text-right"></label>
-                            </div>
-                        </div>
-                        <div id="statusBoardContent" class="container card py-4 text-primary bg-transparent">
+                        <div class="container">
                             <div class="row">
-                                <div class="col-5 text-center">
-                                    <span id="namePlayer1">Player 1</span>
-                                    <div class="m-auto border-0 token">
-                                        <div id="tokenSymbolDivPlayer1" class="card border-0"><span id="tokenSymbolPlayer1">X</span></div>
-                                        <div id="tokenImageDivPlayer1" class="collapse card border-0"><img id="tokenImagePlayer1" class="my-4 mx-auto" src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f60c/512.gif" width="52" height="52" /></div>
+                                <div class="col-sm-12 col-md-4 text-danger card py-2 m-auto text-center border-0" >
+                                    <h3>Game Board Stats</h3>
+                                </div>
+                                
+                                <div class="col-sm-12 col-md-5 card border-danger w-75 m-auto mb-2 pl-2 text-center text-primary jumbotron" >
+                                    <h3 id="statusMessage" class="text-primary">&nbsp;</h3>
+                                </div>
+                            </div>
+                        </div><br/>
+                        <div id="statusBoardContent" class="container card py-4 bg-transparent">
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="card pt-4 border-0 bg-transparent">
+                                        <div id="cardPlayer1" class="card-title text-center">
+                                            <h5 class="text-primary">Player1</h5>
+                                            <h6 id="namePlayer1" class="card-subtitle mb-2 text-muted">Card subtitle</h6> 
+                                        </div>
+                                        <div class="token-statusboard card text-center m-auto bg-primary">
+                                            <div id="tokenSymbolDivPlayer1" class="text-white glow m-auto">
+                                                <span id="tokenSymbolPlayer1" class="py-4">X</span>
+                                            </div>
+                                            <div id="tokenImageDivPlayer1" class="collapse text-white glow m-auto">
+                                                <img id="tokenImagePlayer1" class="mx-auto" src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f60c/512.gif" />
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="col-5 text-center">
-                                    <span id="namePlayer2">Player 2</span>
-                                    <div class="m-auto border-0 token">
-                                        <div id="tokenSymbolDivPlayer2" class="card border-0" ><span id="tokenSymbolPlayer2">O</span></div>
-                                        <div id="tokenImageDivPlayer2" class="collapse card border-0"><img id="tokenImagePlayer2" class="my-4 mx-auto" src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f60c/512.gif" width="52" height="52" /></div>
+                                <div class="col-6">
+                                    <div class="card pt-4 border-0 bg-transparent">
+                                        <div id="cardPlayer2" class="card-title text-center">
+                                            <h5 class="text-danger">Player2</h5>
+                                            <h6 id="namePlayer2" class="card-subtitle mb-2 text-muted">Card subtitle</h6>
+                                        </div>
+                                        <div class="token-statusboard card text-center m-auto bg-danger">
+                                            <div id="tokenSymbolDivPlayer2" class="text-white glow m-auto">
+                                                <span id="tokenSymbolPlayer2" class="">X</span>
+                                            </div>
+                                            <div id="tokenImageDivPlayer2" class="collapse text-white glow m-auto">
+                                                <img id="tokenImagePlayer2" class="mx-auto" src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f60c/512.gif" />
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -1143,7 +1213,7 @@ function startGame(formDataObject) {
         // { Name: name, Token: token}
         let playerName = players[2].Name;
         let playerToken = players[2].Token; 
-        document.getElementById('namePlayer2').innerHTML = '<span class="text-danger">Player 2:</span> ' + playerName;
+        document.getElementById('namePlayer2').innerHTML = playerName;
 
         // X and O tokens use text for tokens, so hide image related elements reserved for emoji tokens
         if (playerToken === 'X' || playerToken === 'O') {
@@ -1190,7 +1260,7 @@ function startGame(formDataObject) {
         // { Name: name, Token: token}
         let playerName = players[1].Name;
         let playerToken = players[1].Token;
-        document.getElementById('namePlayer1').innerHTML = '<span class="text-danger">Player 1:</span> ' + playerName;
+        document.getElementById('namePlayer1').innerHTML = playerName;
 
         // X and O tokens use text for tokens, so hide image related elements reserved for emoji tokens
         if (playerToken === 'X' || playerToken === 'O') {
@@ -1238,7 +1308,7 @@ function startGame(formDataObject) {
         // { Name: name, Token: token}
         let playerName = "Computer";
         let playerToken = players[2].Token;
-        document.getElementById('namePlayer2').innerHTML = '<span class="text-danger">Player 2:</span> ' + playerName;
+        document.getElementById('namePlayer2').innerHTML = playerName;
 
         // Assign symbol to game status board 
         document.getElementById('tokenSymbolPlayer2').outerText = playerToken;
@@ -1252,8 +1322,8 @@ function startGame(formDataObject) {
         // { Name: name, Token: token}
         let playerName = "Computer";
         
-        document.getElementById('namePlayer1').innerHTML = '<span class="text-danger">Player 1:</span> ' + playerName;
-        document.getElementById('namePlayer1').innerHTML = '<span class="text-danger">Player 1:</span> ' + playerName;
+        document.getElementById('namePlayer1').innerHTML = playerName;
+
         // Demo Player 1 using default symbols. No assignment necessary
     }
 
@@ -1289,12 +1359,18 @@ function startGame(formDataObject) {
 
         // Update status board
         let playerName = game.getPlayerName(game.whoseTurnIndex());
-        sendGameStatus(`Player ${playerName}'s move`);
+        sendGameStatus(`Player ${playerName} starts`);
 
         // If computer player's move then let computer make move
         if (playerName === 'Computer') {
             computerMove();
         }
+
+        // Scroll to game grid after a second at the game status board
+        setTimeout(() => {
+            document.getElementById('gameBoard').scrollIntoView({behavior: "smooth"});
+        }, 1500);
+
     }, 4000, `Player ${game.getPlayerName(game.whoseTurnIndex())}'s Turn`);
     
 }
