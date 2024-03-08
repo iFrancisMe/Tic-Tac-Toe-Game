@@ -277,7 +277,7 @@ class TicTacToe {
     }
 
     resetGame() {
-        // Reset game data
+        // Reset game data but keep players object to restart match
         this.#gameBoard.fill(undefined);
         this.#turnsCounter = 0;
         this.#isInProgress = false;
@@ -341,6 +341,10 @@ class TicTacToe {
 
     getPlayer(playerIndex) {
         return this.players[playerIndex];
+    }
+
+    getPlayers() {
+        return this.players;
     }
 
     getPlayerName(playerIndex) {
@@ -834,6 +838,7 @@ let announce = {
     Title: (announceTitle) => {
         let title = document.getElementById("alert-title");
         title.innerHTML = announceTitle;
+        document.getElementById('alert').getElementsByTagName('p').item(0).innerHTML = '';
     },
     Info: (announceMessage) => {
         let messageElement = document.getElementById('alert');
@@ -1010,11 +1015,15 @@ function playerMove(playerSelectionIndex, playerIndex) {
         }
         
         let announceDelay = 1500; // Delay change turn notifaction. When computer makes move, notifications seems to appear too quickly
-        setTimeout(() => {
-            sendGameStatus(`<span class="${color}" >Player ${game.getPlayerName(game.whoseTurnIndex())}'s move</span>`)
-            announce.Title(`${game.getPlayerName(game.whoseTurnIndex('last'))}'s turn`);
-            announce.sendAlert(1500);
-        }, announceDelay);
+        
+        let turnIndex = game.whoseTurnIndex();
+        if (turnIndex != undefined) {
+            setTimeout(() => {
+                sendGameStatus(`<span class="${color}" >Player ${game.getPlayerName(turnIndex)}'s move</span>`)
+                announce.Title(`${game.getPlayerName(turnIndex)}'s turn`);
+                announce.sendAlert(1500);
+            }, announceDelay);
+        }
 
     }
 
@@ -1057,7 +1066,7 @@ function playerMove(playerSelectionIndex, playerIndex) {
 
 }
 
-function startGame(formDataObject) {
+function startGame(formDataObject, startingPlayerIndex) {  // First parameter is players object built from form data. Second parameter is starting player's index for when game is reset and player data already exists.
 
     const gridSize = 9;
     let columnCount = 3;
@@ -1132,8 +1141,11 @@ function startGame(formDataObject) {
     content = `
         <div id="status-board-container" class="jumbotron col-12 bg-white shadow">
             <div class="row">
-                <div class="col-12 text-center mb-4">
-                    <input id="buttonReset" type="button" class="btn-primary btn-lg" value="Reset Game" /> 
+                <div class="col-6 text-center mb-4">
+                    <input id="buttonReset" type="button" class="btn-primary btn-lg" value="Cancel Game" /> 
+                </div>
+                <div class="col-6 text-center mb-4">
+                    <input id="buttonReplay" type="button" class="btn-primary btn-lg" value="Restart Match" /> 
                 </div>
                 <div class="col-12">
                     <div class="container card jumbotron border-5 border-primary bg-white my-4">
@@ -1192,11 +1204,26 @@ function startGame(formDataObject) {
     `
     statusBoard.innerHTML = content;
 
-    // Button event listeners
+    // Reset button event listeners
     onClick('buttonReset', 'click', () => {
         location.reload();
     });
 
+    // Replay button event listener
+    onClick('buttonReplay', 'click', () => {
+        game.pauseGame(true);
+        game.endGame();
+        game.resetGame();
+
+        let playersCountObject = {
+            PlayerCount: 2
+        };
+
+        gamers.unshift(playersCountObject);
+        
+        startGame(gamers);
+    });
+    
     let buttonBoard = gameBoard.getElementsByClassName('grid-button');
     testPoints(`Function: startGame, Collecting elements of grid buttons. Inspecting contents: ${buttonBoard} is instance of HTML Collection (${buttonBoard instanceof HTMLCollection}), Item count = ${buttonBoard.length}`);
     
