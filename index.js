@@ -1063,7 +1063,7 @@ function playerMove(playerSelectionIndex, playerIndex) {
                     patternNames.push(game.getPatternFromIndex(item).GridPattern);
                 });
 
-                return patternNames.join('\n');
+                return patternNames.join('<br/>');
             }
 
             let winnerToken = winner.Token;
