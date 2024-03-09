@@ -610,6 +610,14 @@ onClick('gameStartButton', 'click', () => {
         } else {
             document.getElementById('tokenRequiredPlayer2').setAttribute('hidden', 'hidden'); // Hide input validation error
         }
+
+        // If player1 and player2 have the same emoji value, show validation error 
+        if (tokenPlayer1 === tokenPlayer2) {
+            document.getElementById('tokenError').removeAttribute('hidden'); // Indicate why selection cannot be granted
+            formErrors = true;
+        } else {
+            document.getElementById('tokenError').setAttribute('hidden', 'hidden'); // Indicate why selection cannot be granted
+        }
     }
 
     if (numberOfPlayers >= 1) { // Form validation for Player 1
@@ -641,15 +649,28 @@ onClick('gameStartButton', 'click', () => {
 });
 
 onClick('formPlayer1RandomToken', 'click', () => {
-    let emoji = randomEmoji();
-
-    let emojiHexValue = emoji.codePointAt(0).toString(16);
     
+    let field = document.getElementById('formEmojiUnicodePlayer1'); // Player's emoji hex value
+    let fieldOtherPlayer = document.getElementById('formEmojiUnicodePlayer2'); // Competing player's emoji hex value
+    
+    let emoji; // For player's random emoji
+    let emojiHexValue; // For emoji hex value derivation
+
+    // Prevent players from playing with duplicate emoji tokens. Reassign random emoji if current player is assigned other player's emoji
+    do {
+
+        emoji = randomEmoji();
+        emojiHexValue = emoji.codePointAt(0).toString(16);
+
+        (emojiHexValue === fieldOtherPlayer.value) ? testPoints(`Function: onClick for formPlayer2RandomToken, Player 2 assigned duplicate emoji. Regenerating now.`) : null;
+
+    } while (emojiHexValue === fieldOtherPlayer.value);
+    
+    // Get emoji object
     let emojiObject = getEmojiObject(emojiHexValue);
+    testPoints(`Function: onClick for formPlayer1RandomToken, Emoji hex value = ${emojiHexValue}; (emoji === emojiObject.emoji) is ${emoji === emojiObject.emoji}`);
 
-    testPoints(`Emoji hex value = ${emojiHexValue}; (emoji === emojiObject.emoji) is ${emoji === emojiObject.emoji}`);
-
-    let field = document.getElementById('formEmojiUnicodePlayer1')
+    // Assign emoji token to player
     field.value = emojiObject.hexValue;
 
     let img = document.getElementById('emojiPlayer1');
@@ -658,15 +679,28 @@ onClick('formPlayer1RandomToken', 'click', () => {
 });
 
 onClick('formPlayer2RandomToken', 'click', () => {
-    let emoji = randomEmoji();
-
-    let emojiHexValue = emoji.codePointAt(0).toString(16);
     
+    let field = document.getElementById('formEmojiUnicodePlayer2'); // Player's emoji hex value
+    let fieldOtherPlayer = document.getElementById('formEmojiUnicodePlayer1'); // Competing player's emoji hex value
+    
+    let emoji; // For player's random emoji
+    let emojiHexValue; // For emoji hex value derivation
+
+    // Prevent players from playing with duplicate emoji tokens. Reassign random emoji if current player is assigned other player's emoji
+    do {
+
+        emoji = randomEmoji();
+        emojiHexValue = emoji.codePointAt(0).toString(16);
+
+        (emojiHexValue === fieldOtherPlayer.value) ? testPoints(`Function: onClick for formPlayer2RandomToken, Player 2 assigned duplicate emoji. Regenerating now.`) : null;
+
+    } while (emojiHexValue === fieldOtherPlayer.value);
+    
+    // Get emoji object
     let emojiObject = getEmojiObject(emojiHexValue);
+    testPoints(`Function: onClick for formPlayer2RandomToken, Emoji hex value = ${emojiHexValue}; (emoji === emojiObject.emoji) is ${emoji === emojiObject.emoji}`);
 
-    testPoints(`Emoji hex value = ${emojiHexValue}; (emoji === emojiObject.emoji) is ${emoji === emojiObject.emoji}`);
-
-    let field = document.getElementById('formEmojiUnicodePlayer2')
+    // Assign emoji token to player
     field.value = emojiObject.hexValue;
 
     let img = document.getElementById('emojiPlayer2');
