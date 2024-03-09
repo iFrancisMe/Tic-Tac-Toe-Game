@@ -121,13 +121,14 @@ class TicTacToe {
         return this.#gameBoardPaused; // Returns pause status
     }
 
-    // Rolls dice to determin first player
+    // Rolls dice to determine first player
     whosFirst() {
         let playerIndex = parseInt(Math.random() * 100) % this.#MAX_PLAYERS; // Random index returns 0 or 1
         testPoints(`Class Method: whosFirst, player index to start is ${playerIndex}`);
         return playerIndex;
     }
 
+    // Returns index of player currently in turn
     whoseTurnIndex(option) {
         let turnIndex = this.#turnsCounter;
 
@@ -144,15 +145,18 @@ class TicTacToe {
         }
     }
 
+    // Used as a factor to delay "computer" player's moves each turn
     getComputerMovesCounter() {
         return this.#computerMovesCounter++; // return count then increment
     }
 
+    // Initializes game board and counters
     startRound(playersObjectArray) {
 
         // Initialize game with player object array
         this.players = playersObjectArray;
 
+        // testPoints are test point messages sent to the console used for debugging and development
         testPoints(`Class Method: startRound, Players Object contains ${this.players} of size ${this.players.length}`);
         testPoints(`Class Method: startRound, Players index 0 Name: ${this.players[0].Name}, Token: ${this.players[0].Token}`);
         testPoints(`Class Method: startRound, Players index 1 Name: ${this.players[1].Name}, Token: ${this.players[1].Token}`);
@@ -180,6 +184,7 @@ class TicTacToe {
         }
     }
 
+    // Method to simulate a selection made by the computer. Method extracts a collection of available game board indexes and randomly selects one and returns value
     computerSelectsMove(playerIndex) {
         // Logic for computer selection
         // Need to select a random square ID on game board from available selections
@@ -196,12 +201,14 @@ class TicTacToe {
 
         testPoints(`Class Method: computerSelectsMove, players index ${playerIndex} selects gameboard index ${selectionIndex}`);
         
+        // Returns chosen gameboard index required for making a move with playerMove method
         return selectionIndex;
     }
 
+    // Method to initiate player's selected move and record it into the current gameboard array
     makeMove(playerIndex, selectionIndex) {
 
-        // Check if game is not over
+        // Check if game is not over. Returns message if game is over.
         if (this.isGameOver() === true) {
 
             // Check if winner found
@@ -222,7 +229,7 @@ class TicTacToe {
             }
         }
 
-        // Check if player index has valid turn
+        // Check if player index has valid turn to prevent player taking double turns
         if (playerIndex !== this.whoseTurnIndex()) {
             return 'Not your turn';
         } 
@@ -233,6 +240,8 @@ class TicTacToe {
         testPoints(`Class Method: makeMove, players object contains ${players[playerIndex]}`);
         testPoints(`Class Method: makeMove, players object contains ${this.players[playerIndex]}`);
         let selection = this.#gameBoard[selectionIndex];
+        
+        // Checks to see if player's selection is not currently assigned
         if (selection === undefined) {
             this.#gameBoard[selectionIndex] = players[playerIndex].Token;
             testPoints(`Class Method: makeMove. Player ${players[playerIndex].Name} selected gameboard index ${selectionIndex}. Game Board value in selected index is ${this.#gameBoard[selectionIndex]}`);
@@ -281,6 +290,13 @@ class TicTacToe {
         this.#gameBoard.fill(undefined);
         this.#turnsCounter = 0;
         this.#isInProgress = false;
+
+        // Clear winner object data
+        this.#winner = {
+            Name: '',
+            Token: '',
+            PatternIndices: [] // Possible win by multiple rows
+        };
     }
 
     getWinner(itemName) {
@@ -866,12 +882,19 @@ let announce = {
                     let alertDiv = document.getElementById('alert');
 
                     if (alertDiv.classList.contains('collapse') == false) {
+                        
                         alertDiv.classList.add('collapse');
+                        announce.clear(); // Clear alert contents
+
                         testPoints(`Alert Message Timeout for Message ID: ${id}`);
                     }
                 }
             },timeoutValue, messageID);
         }
+    },
+    clear() {  // Clear contents of alert div
+        document.getElementById("alert-title").innerHTML = '';
+        document.getElementById('alert').getElementsByTagName('p').item(0).innerHTML = '';
     }
 };
 
